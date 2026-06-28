@@ -4,15 +4,15 @@ const cors = require('cors');
 const app = express();
 
 // Middlewares
-// 💡 OPTIMIZACIÓN: Restringe el CORS en producción para que solo tu frontend pueda hacer peticiones
 const allowedOrigins = [
-    'http://localhost:4200', // Reemplaza por el puerto local de tu frontend (ej. Angular)
-    process.env.FRONTEND_URL // URL de tu frontend en Render/Vercel (se configura en las variables de entorno)
+    'http://localhost:4200',        // Desarrollo local
+    'https://fact-electr.onrender.com', // Frontend real en producción 
+    process.env.FRONTEND_URL
 ];
 
 app.use(cors({
     origin: function (origin, callback) {
-        // Permite peticiones sin origen (como Postman o apps móviles nativas si es el caso)
+        // Permite peticiones sin origen (como Postman o llamadas internas del mismo servidor)
         if (!origin) return callback(null, true);
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
@@ -25,8 +25,6 @@ app.use(cors({
 app.use(express.json());
 
 // 1. CONFIGURACIÓN DEL POOL DE CONEXIONES (Hacia TiDB Cloud)
-// 🚨 CRÍTICO: Se eliminaron las credenciales en texto plano por seguridad. 
-// Las leeremos desde variables de entorno en Render.
 const db = mysql.createPool({
     host: process.env.DB_HOST || 'gateway01.us-east-1.prod.aws.tidbcloud.com', 
     user: process.env.DB_USER,
